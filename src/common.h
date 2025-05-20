@@ -19,14 +19,14 @@
 #define MINIMAP_UNIT_SIZE       100
 #define VROT_HALF_RANGE         (25 * DEG2RAD)
 
-#define KEY_GO_FORWARD  KEY_W
-#define KEY_GO_BACKWARD KEY_S
-#define KEY_TURN_LEFT   KEY_A
-#define KEY_TURN_RIGHT  KEY_D
+#define KEY_GO_FORWARD  KEY_UP
+#define KEY_GO_BACKWARD KEY_DOWN
+#define KEY_TURN_LEFT   KEY_LEFT
+#define KEY_TURN_RIGHT  KEY_RIGHT
 #define KEY_LOOK_UP     KEY_Q
-#define KEY_LOOK_DOWN   KEY_E
-#define KEY_FLY_UP      KEY_R
-#define KEY_FLY_DOWN    KEY_F
+#define KEY_LOOK_DOWN   KEY_A
+#define KEY_FLY_UP      KEY_W
+#define KEY_FLY_DOWN    KEY_S
 #define KEY_SETTINGS    KEY_ESCAPE
 #define KEY_NAV_UP      KEY_UP
 #define KEY_NAV_DOWN    KEY_DOWN
@@ -39,10 +39,10 @@
 #define CHOICE_CONTROL_W_APPLY_LABEL  "[LEFT/RIGHT] to change\n[SPACE] to apply"
 #define CHECKBOX_CONTROL_LABEL        "[SPACE] to change"
 #define GENERAL_CONTROLS_LABEL        "CONTROLS\n"     \
-                                      "[W/S] move\n"   \
-                                      "[A/D] turn\n"   \
-                                      "[Q/E] pitch\n"  \
-                                      "[R/F] fly\n"    \
+                                      "[UP/DOWN] move\n"   \
+                                      "[LEFT/RIGHT] turn\n"   \
+                                      "[Q/A] look up or down\n"  \
+                                      "[W/S] fly up or dowm\n"    \
                                       "[ESC] settings"
 
 static const int renderWidthPresets[] = {

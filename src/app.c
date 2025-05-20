@@ -121,10 +121,12 @@ void appUpdate(App* a) {
     }
 
     UpdateTexture(a->terrainTex, a->terrainImg.data);
-    playerControl(&a->player, &a->map);
     projTerrain(a->terrainImg, &a->rendConf, &a->cam, &a->map);
     if (a->settings.showOptions) {
         menuUpdate(&a->menu);
+    }
+    else {
+        playerControl(&a->player, &a->map);
     }
     appUpdateSettings(a);
 
