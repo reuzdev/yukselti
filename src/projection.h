@@ -25,19 +25,19 @@ typedef struct RenderConfig {
     int threadCount;
 } RenderConfig;
 
-typedef struct DrawTerrSlicesArgs {
+typedef struct ProjTerrSlicesArgs {
     Image image;
     RenderConfig* rendConf;
     Cam* cam;
     Map* map;
     int x0;
     int width;
-} DrawTerrSlicesArgs;
+} ProjTerrSlicesArgs;
 
 float calcVFovRad(float hFovRad, RenderConfig* rendConf);
 void projTerrainSlice(Image image, RenderConfig* rendConf, Cam* cam, Map* map, int x);
 void projTerrainSlices(Image image, RenderConfig* rendConf, Cam* cam, Map* map, int x0, int width);
-void projTerrainSlicesEntry(DrawTerrSlicesArgs* args);
+int projTerrainSlicesEntry(void* args_);
 void projTerrain(Image image, RenderConfig* rendConf, Cam* cam, Map* map);
 
 #endif // PROJECTION_H

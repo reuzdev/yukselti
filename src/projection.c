@@ -56,9 +56,11 @@ void projTerrainSlices(Image image, RenderConfig* rendConf, Cam* cam, Map* map, 
     }
 }
 
-void projTerrainSlicesEntry(DrawTerrSlicesArgs* args) {
+int projTerrainSlicesEntry(void* args_) {
+    ProjTerrSlicesArgs* args = (ProjTerrSlicesArgs*)args_;
     projTerrainSlices(args->image, args->rendConf, args->cam, args->map, args->x0, args->width);
     free(args);
+    return 0;
 }
 
 void projTerrain(Image image, RenderConfig* rendConf, Cam* cam, Map* map) {
@@ -67,8 +69,8 @@ void projTerrain(Image image, RenderConfig* rendConf, Cam* cam, Map* map) {
     int widthPerThread = (int)ceilf(rendConf->width / (float)threadCount);
 
     for (size_t i = 0; i < threadCount; i++) {
-        DrawTerrSlicesArgs* args = malloc(sizeof(DrawTerrSlicesArgs));
-        *args = (DrawTerrSlicesArgs) {
+        ProjTerrSlicesArgs* args = malloc(sizeof(ProjTerrSlicesArgs));
+        *args = (ProjTerrSlicesArgs) {
             .image = image,
             .rendConf = rendConf,
             .cam = cam,
@@ -76,7 +78,7 @@ void projTerrain(Image image, RenderConfig* rendConf, Cam* cam, Map* map) {
             .x0 = widthPerThread * (int)i,
             .width = widthPerThread
         };
-        thrd_create(&threads[i], (thrd_start_t)projTerrainSlicesEntry, args);
+        thrd_create(&threads[i], projTerrainSlicesEntry, args);
     }
 
     for (size_t i = 0; i < threadCount; i++) {

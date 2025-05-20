@@ -168,7 +168,7 @@ void menuUpdate(Menu* menu) {
             - IsKeyPressed(KEY_NAV_UP) - IsKeyPressedRepeat(KEY_NAV_UP);
 
     if (navDir) {
-        for (int i = (int)menu->selected + navDir; i >= 0 && i < menu->count; i += navDir) {
+        for (int i = (int)menu->selected + navDir; i >= 0 && i < (int)menu->count; i += navDir) {
             if (menu->items[i]->type != MENU_TITLE) {
                 menu->selected = i;
                 break;
@@ -213,6 +213,8 @@ MenuItem* menuItCreateDescription(const char* label, const char* description) {
 }
 
 void settingUpdate(Setting* settg) {
+    int changeDir = IsKeyPressed(KEY_NAV_RIGHT) + IsKeyPressedRepeat(KEY_NAV_RIGHT)
+                  - IsKeyPressed(KEY_NAV_LEFT) - IsKeyPressedRepeat(KEY_NAV_LEFT);
     switch (settg->type)
     {
     case SETTG_CHECKBOX:
@@ -231,8 +233,6 @@ void settingUpdate(Setting* settg) {
             *settg->choice.select = *settg->choice.peek;
         break;
     case SETTG_SLIDER:
-        int changeDir = IsKeyPressed(KEY_NAV_RIGHT) + IsKeyPressedRepeat(KEY_NAV_RIGHT)
-                      - IsKeyPressed(KEY_NAV_LEFT) - IsKeyPressedRepeat(KEY_NAV_LEFT);
         *settg->slider.value += settg->slider.step * changeDir;
         *settg->slider.value = Clamp(*settg->slider.value, settg->slider.min, settg->slider.max);
         break;
@@ -262,15 +262,16 @@ void menuItemUpdateDisplay(MenuItem* item) {
     if (item->type != MENU_SETTING)
         return;
 
+    char* suffix = NULL;
     switch (item->setting.type)
     {
     case SETTG_CHECKBOX:
-        const char* checkboxSuffix = *item->setting.checkbox.value ? "(X)" : "( )";
-        snprintf(item->display, MENU_DISPLAY_BUFF_SIZE, "%s %s", item->setting.label, checkboxSuffix);
+        suffix = *item->setting.checkbox.value ? "(X)" : "( )";
+        snprintf(item->display, MENU_DISPLAY_BUFF_SIZE, "%s %s", item->setting.label, suffix);
         break;
     case SETTG_CHOICE:
-        const char* choiceSuffix = *item->setting.choice.peek == *item->setting.choice.select ? "" : "*";
-        snprintf(item->display, MENU_DISPLAY_BUFF_SIZE, "%s (%s)%s", item->setting.label, *item->setting.choice.show, choiceSuffix);
+        suffix = *item->setting.choice.peek == *item->setting.choice.select ? "" : "*";
+        snprintf(item->display, MENU_DISPLAY_BUFF_SIZE, "%s (%s)%s", item->setting.label, *item->setting.choice.show, suffix);
         break;
     case SETTG_SLIDER:
         snprintf(item->display, MENU_DISPLAY_BUFF_SIZE, "%s (%.2f)", item->setting.label, *item->setting.slider.value);

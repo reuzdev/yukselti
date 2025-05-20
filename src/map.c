@@ -8,7 +8,7 @@
 #include "map.h"
 #include "common.h"
 
-LineScan lnScanCreate(RenderConfig* rendConf, Cam* cam, int maxUndetailLevel, int scrX) {
+LineScan lnScanCreate(RenderConfig* rendConf, Cam* cam, size_t maxUndetailLevel, int scrX) {
     float distToScreen = rendConf->width / 2.0f / tanf(cam->hFovRad/2);
     float angleDelta = atanf((rendConf->width / 2.0f - scrX) / distToScreen);
     float angle = cam->player->hRotRad + angleDelta;
@@ -106,7 +106,7 @@ bool loadMapImages(const char* folderName, Image* colormap, Image* heightmap) {
     return filesExist;
 }
 
-Map mapCreate(Image colormap, Image heightmap, bool wraps, Color skyColor, float maxHeight, int detailLevels) {
+Map mapCreate(Image colormap, Image heightmap, bool wraps, Color skyColor, float maxHeight, size_t detailLevels) {
     Image* colorMaps = malloc(detailLevels * sizeof(Image));
     Image* elevMaps = malloc(detailLevels * sizeof(Image));
 
@@ -144,7 +144,7 @@ void mapDestroy(Map* map) {
     UnloadTexture(map->colorMapTxt);
 }
 
-Cell mapGetCell(Map* map, Vector2 pos, int undetailLevel) {
+Cell mapGetCell(Map* map, Vector2 pos, size_t undetailLevel) {
     if (map->wraps) {
         pos.x = Wrap(pos.x, 0, map->size.x);
         pos.y = Wrap(pos.y, 0, map->size.y);

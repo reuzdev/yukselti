@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #include <raylib.h>
+#include <stddef.h>
 
 #define MAX_THREAD_COUNT        24
 #define MENU_DISPLAY_BUFF_SIZE  256

@@ -308,7 +308,7 @@ void appInitMenu(App* a) {
             &s->fpsSettg,
             FPS_SETTG_COUNT - 1,
             false,
-            &s->fpsSettgDisplay
+            (const char**)&s->fpsSettgDisplay
         )),
         menuItCreateSetting(settingCreateCheckbox(
             "Show Minimap",
@@ -339,7 +339,7 @@ void appInitMenu(App* a) {
             &s->mapIdxTried,
             (int)s->mapCount - 1,
             true,
-            &s->mapSettgDisplay
+            (const char**)&s->mapSettgDisplay
         )),
         menuItCreateSetting(settingCreateSlider(
             "Max Height",
@@ -358,7 +358,7 @@ void appInitMenu(App* a) {
             &s->skySettg,
             s->skyPresetCount - 1,
             false,
-            &s->skySettgDisplay
+            (const char**)&s->skySettgDisplay
         )),
         menuItCreateSetting(settingCreateSlider(
             "Fog Distance",
@@ -405,7 +405,7 @@ void appInitMenu(App* a) {
             &s->rendWIdxTried,
             s->rendWidthCount - 1 + 1,
             true,
-            &s->rendWSettgDisplay
+            (const char**)&s->rendWSettgDisplay
         )),
         menuItCreateSetting(settingCreateSlider(
             "Thread Count",
