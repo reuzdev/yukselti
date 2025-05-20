@@ -6,20 +6,38 @@
 #include "map.h"
 #include "gui.h"
 
+typedef enum FPSSettingValues {
+    FPS_SETTG_DISABLED = 0,
+    FPS_SETTG_SIMPLE,
+    FPS_SETTG_DETAILED,
+    FPS_SETTG_COUNT
+} FPSSettingValues;
+
+typedef struct SkyPreset {
+    const char* name;
+    Color color;
+} SkyPreset;
+
 typedef struct Settings {
-    char* resSettgDisplay;
-    int resIdxPeek, resIdxTried, resIdxApplied;
+    const int* rendWidths;
+    int rendWidthCount;
+    char* rendWSettgDisplay;
+    int rendWIdxPeek, rendWIdxTried, rendWIdxApplied;
 
     char* mapSettgDisplay;
     char** mapNames;
     int mapIdxPeek, mapIdxTried, mapIdxApplied;
     size_t mapCount;
 
+    const char** fpsSettgDisplays;
     char* fpsSettgDisplay;
-    int showFPSLevel;
+    int fpsSettg;
 
+    const SkyPreset* skyPresets;
+    int skyPresetCount;
+    const char** skySettgDisplays;
     char* skySettgDisplay;
-    int skyColorIdx;
+    int skySettg;
 
     float fogDistPercent;
     float hFovDeg;

@@ -17,7 +17,7 @@
 #define REL_LETTER_SPACING      0.1f
 #define REL_LINE_SPACING        0.1f
 #define MINIMAP_UNIT_SIZE       100
-#define VROT_HALF_RANGE         (25 * DEG2RAD)
+#define VROT_HALF_RANGE         (40 * DEG2RAD)
 
 #define KEY_GO_FORWARD  KEY_UP
 #define KEY_GO_BACKWARD KEY_DOWN
@@ -44,78 +44,6 @@
                                       "[Q/A] look up or down\n"  \
                                       "[W/S] fly up or dowm\n"    \
                                       "[ESC] settings"
-
-static const int renderWidthPresets[] = {
-    200, 400, 800, 1280, 1920
-};
-
-#define INITIAL_RENDER_WIDTH_PRESET 2
-#define RENDER_WIDTH_PRESET_COUNT sizeof(renderWidthPresets)/sizeof(renderWidthPresets[0])
-
-typedef struct ColorPreset {
-    const char* name;
-    Color color;
-} ColorPreset;
-
-static const ColorPreset colorPresets[] = {
-    { "Blue", { 102, 191, 255, 255 } },
-    { "White", { 245, 245, 245, 255 } },
-    { "Yellow", { 255, 253, 156, 255 }},
-    { "Red", { 200, 20, 13, 255 }},
-    { "Orange", { 255, 143, 74, 255 }}
-};
-
-#define COLOR_PRESET_COUNT sizeof(colorPresets)/sizeof(colorPresets[0])
-
-typedef enum PerformanceImpact {
-    PERFIMP_NONE = 0,
-    PERFIMP_LOW,
-    PERFIMP_MEDIUM,
-    PERFIMP_HIGH,
-    PERFIMP_EXTREME,
-    PERFIMP_COUNT
-} PerformanceImpact;
-
-typedef struct PerformanceImpactPreset {
-    const char* label;
-    Color color;
-} PerformanceImpactPreset;
-
-static const PerformanceImpactPreset perfImpPresets[PERFIMP_COUNT] = {
-    [PERFIMP_NONE] = {
-        .label = "Performance Impact:\nNEGLIGABLE",
-        .color = { 111, 226, 237, 255 }
-    },
-    [PERFIMP_LOW] = {
-        .label = "Performance Impact:\nLOW",
-        .color = { 176, 237, 111, 255 }
-    },
-    [PERFIMP_MEDIUM] = {
-        .label = "Performance Impact:\nMEDIUM",
-        .color = { 240, 212, 120, 255 }
-    },
-    [PERFIMP_HIGH] = {
-        .label = "Performance Impact:\nHIGH",
-        .color = { 255, 99, 138, 255 }
-    },
-    [PERFIMP_EXTREME] = {
-        .label = "Performance Impact:\nEXTREME",
-        .color = { 192, 110, 255, 255 }
-    }
-};
-
-typedef enum ShowFPSLevel {
-    SHOWFPS_NONE,
-    SHOWFPS_SIMPLE,
-    SHOWFPS_DETAILED,
-    SHOWFPS_COUNT
-} ShowFPSLevel;
-
-static const char* showFPSDisplays[SHOWFPS_COUNT] = {
-    [SHOWFPS_NONE] = "Disabled",
-    [SHOWFPS_SIMPLE] = "Simple",
-    [SHOWFPS_DETAILED] = "Detailed",
-};
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))

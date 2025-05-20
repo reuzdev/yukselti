@@ -8,6 +8,32 @@
 #include "map.h"
 #include "gui.h"
 
+PerfImpLabel getPerfImpLabel(size_t i) {
+    static const PerfImpLabel perfImpLabelPresets[PERFIMP_COUNT] = {
+        [PERFIMP_NONE] = {
+            .label = "Performance Impact:\nNEGLIGABLE",
+            .color = { 111, 226, 237, 255 }
+        },
+        [PERFIMP_LOW] = {
+            .label = "Performance Impact:\nLOW",
+            .color = { 176, 237, 111, 255 }
+        },
+        [PERFIMP_MEDIUM] = {
+            .label = "Performance Impact:\nMEDIUM",
+            .color = { 240, 212, 120, 255 }
+        },
+        [PERFIMP_HIGH] = {
+            .label = "Performance Impact:\nHIGH",
+            .color = { 255, 99, 138, 255 }
+        },
+        [PERFIMP_EXTREME] = {
+            .label = "Performance Impact:\nEXTREME",
+            .color = { 192, 110, 255, 255 }
+        }
+    };
+    return perfImpLabelPresets[i];
+}
+
 OptionalFloat optFltVal(float value) {
     return (OptionalFloat) {
         .exists = true,
@@ -93,7 +119,7 @@ Sides sidesCreate(OptionalFloat top, OptionalFloat right, OptionalFloat bottom, 
     };
 }
 
-Setting settingCreateSlider(const char* label, PerformanceImpact perfImpact, const char* description, float* value, float min, float max, float step) {
+Setting settingCreateSlider(const char* label, PerfImpLabelType perfImpact, const char* description, float* value, float min, float max, float step) {
     return (Setting) {
         .label = label,
         .type = SETTG_SLIDER,
@@ -106,7 +132,7 @@ Setting settingCreateSlider(const char* label, PerformanceImpact perfImpact, con
     };
 }
 
-Setting settingCreateCheckbox(const char* label, PerformanceImpact perfImpact, const char* description, bool* value) {
+Setting settingCreateCheckbox(const char* label, PerfImpLabelType perfImpact, const char* description, bool* value) {
     return (Setting) {
         .label = label,
         .type = SETTG_CHECKBOX,
@@ -116,7 +142,7 @@ Setting settingCreateCheckbox(const char* label, PerformanceImpact perfImpact, c
     };
 }
 
-Setting settingCreateChoice(const char* label, PerformanceImpact perfImpact, const char* description, int* peek, int* select, int max, bool askToApply, const char** show) {
+Setting settingCreateChoice(const char* label, PerfImpLabelType perfImpact, const char* description, int* peek, int* select, int max, bool askToApply, const char** show) {
     return (Setting) {
         .label = label,
         .type = SETTG_CHOICE,
@@ -283,8 +309,8 @@ Rectangle guiMenu(Font font, Menu* menu, Sides pos, float padding, float fontSz,
 }
 
 Rectangle guiSettingDetails(Font font, MenuItem* item, Sides pos, float padding, float fontSz, float relLnSpacing, Color bgColor, Color normalColor) {
-    PerformanceImpact perfImp = item->setting.perfImpact;
-    const char* perfImpLabel = perfImpPresets[perfImp].label;
+    PerfImpLabelType perfImp = item->setting.perfImpact;
+    const char* perfImpLabel = getPerfImpLabel(perfImp).label;
     float letterSpacing = fontSz * REL_LETTER_SPACING;
     float lineSpacing = fontSz * relLnSpacing;
     char* controlText = NULL;
@@ -324,7 +350,7 @@ Rectangle guiSettingDetails(Font font, MenuItem* item, Sides pos, float padding,
     textPos.y += titleSize.y + lineSpacing;
     DrawTextEx(font, item->setting.description, textPos, fontSz, letterSpacing, Fade(normalColor, 0.75));
     textPos.y += descSize.y + lineSpacing;
-    DrawTextEx(font, perfImpLabel, textPos, fontSz, lineSpacing, perfImpPresets[perfImp].color);
+    DrawTextEx(font, perfImpLabel, textPos, fontSz, lineSpacing, getPerfImpLabel(perfImp).color);
     textPos.y += perfTextSize.y + lineSpacing;
     DrawTextEx(font, controlText, textPos, fontSz, letterSpacing, normalColor);
 

@@ -4,6 +4,7 @@
 #include <math.h>
 #include <raylib.h>
 #include <raymath.h>
+#include <float.h>
 #include "app.h"
 #include "map.h"
 #include "projection.h"
@@ -39,11 +40,11 @@ App* appCreate(void) {
         .hRotRad = 0,
         .vRotRad = 0,
         .maxHRotSpeedRad = 135 * DEG2RAD,
-        .maxVRotSpeedRad = 10 * DEG2RAD,
+        .maxVRotSpeedRad = 40 * DEG2RAD,
         .hRotSpeedRad = 0,
         .vRotSpeedRad = 0,
         .hRotAccelRad = 1280 * DEG2RAD,
-        .vRotAccelRad = 50 * DEG2RAD
+        .vRotAccelRad = 300 * DEG2RAD
     };
 
     a->cam = (Cam) {
@@ -77,7 +78,7 @@ void appDestroy(App* a) {
     UnloadTexture(a->terrainTex);
     mapDestroy(&a->map);
     menuDestroy(&a->menu);
-    free(a->settings.resSettgDisplay);
+    free(a->settings.rendWSettgDisplay);
     for (size_t i = 0; i < a->settings.mapCount; i++) {
         free(a->settings.mapNames[i]);
     }
@@ -135,11 +136,11 @@ void appUpdate(App* a) {
     if (a->secSinceFPSUpdated >= FPS_UPDATE_PERIOD_SEC) {
         float fps = a->framesSinceFPSUpdated / a->secSinceFPSUpdated;
         float mspf = a->secSinceFPSUpdated * 1000 / a->framesSinceFPSUpdated;
-        switch (a->settings.showFPSLevel) {
-        case SHOWFPS_SIMPLE:
+        switch (a->settings.fpsSettg) {
+        case FPS_SETTG_SIMPLE:
             snprintf(a->fpsLabel, MENU_DISPLAY_BUFF_SIZE, "FPS %.2f", fps);
             break;
-        case SHOWFPS_DETAILED:
+        case FPS_SETTG_DETAILED:
             snprintf(a->fpsLabel, MENU_DISPLAY_BUFF_SIZE, "FPS %.2f\n%.2f ms", fps, mspf);
             break;
         default:
@@ -184,7 +185,7 @@ void appDraw(App* a) {
     SetTextLineSpacing(lnSpacing);
 
     float topOff = PADDING;
-    if (a->settings.showFPSLevel != SHOWFPS_NONE) {
+    if (a->settings.fpsSettg != FPS_SETTG_DISABLED) {
         Sides fpsSides = sidesCreate(optFltVal(topOff), optFltVal(PADDING), optFltNull(), optFltNull());
         topOff += guiTextWithBG(
             font, a->fpsLabel, fpsSides, PADDING, FONT_SIZE,
@@ -244,34 +245,58 @@ void appDraw(App* a) {
 }
 
 void appInitSettings(App* a) {
-    a->settings.resSettgDisplay = calloc(MENU_DISPLAY_BUFF_SIZE, sizeof(char)),
-    a->settings.resIdxPeek = INITIAL_RENDER_WIDTH_PRESET,
-    a->settings.resIdxTried = INITIAL_RENDER_WIDTH_PRESET,
-    a->settings.resIdxApplied = INITIAL_RENDER_WIDTH_PRESET,
+    static const int rendWPresets[] = { 200, 400, 600, 800, 1280, 1920 };
+    static const int initialRendWIdx = 3;
+    static const char* fpsSettgDisplays[FPS_SETTG_COUNT] = {
+        [FPS_SETTG_DISABLED] = "Disabled",
+        [FPS_SETTG_SIMPLE] = "Simple",
+        [FPS_SETTG_DETAILED] = "Detailed"
+    };
+    static const SkyPreset skyPresets[] = {
+        { "Blue", { 102, 191, 255, 255 } },
+        { "White", { 245, 245, 245, 255 } },
+        { "Yellow", { 255, 253, 156, 255 }},
+        { "Red", { 200, 20, 13, 255 }},
+        { "Orange", { 255, 143, 74, 255 }}
+    };
 
-    a->settings.mapSettgDisplay = a->settings.mapNames[a->settings.mapIdxApplied];
-    a->settings.mapIdxPeek = a->settings.mapIdxApplied;
-    a->settings.mapIdxTried = a->settings.mapIdxApplied;
+    Settings* s = &a->settings;
 
-    a->settings.showFPSLevel = SHOWFPS_SIMPLE;
-    a->settings.fpsSettgDisplay = (char*)showFPSDisplays[SHOWFPS_SIMPLE];
+    s->rendWidths = rendWPresets;
+    s->rendWidthCount = sizeof(rendWPresets)/sizeof(rendWPresets[0]);
+    s->rendWSettgDisplay = calloc(MENU_DISPLAY_BUFF_SIZE, sizeof(char)),
+    s->rendWIdxPeek = initialRendWIdx,
+    s->rendWIdxTried = initialRendWIdx,
+    s->rendWIdxApplied = initialRendWIdx,
 
-    a->settings.skyColorIdx = 0;
-    a->settings.skySettgDisplay = (char*)colorPresets[0].name;
+    s->mapSettgDisplay = a->settings.mapNames[a->settings.mapIdxApplied];
+    s->mapIdxPeek = a->settings.mapIdxApplied;
+    s->mapIdxTried = a->settings.mapIdxApplied;
 
-    a->settings.fogDistPercent = (1 - a->rendConf.fogStartDist/a->rendConf.viewDist) * 100;
-    a->settings.hFovDeg = a->cam.hFovRad * RAD2DEG;
+    s->fpsSettgDisplays = fpsSettgDisplays;
+    s->fpsSettg = FPS_SETTG_SIMPLE;
+    s->fpsSettgDisplay = (char*)s->fpsSettgDisplays[FPS_SETTG_SIMPLE];
 
-    a->settings.threadCount = (float)a->rendConf.threadCount;
-    a->settings.showMinimap = true;
-    a->settings.showControls = true;
-    a->settings.showPlayerInfo = false;
-    a->settings.showOptions = false;
+    s->skyPresets = skyPresets;
+    s->skyPresetCount = sizeof(skyPresets)/sizeof(skyPresets[0]);
+    s->skySettg = 0;
+    s->skySettgDisplay = (char*)s->skyPresets[0].name;
+
+    s->fogDistPercent = (1 - a->rendConf.fogStartDist/a->rendConf.viewDist) * 100;
+    s->hFovDeg = a->cam.hFovRad * RAD2DEG;
+
+    s->threadCount = (float)a->rendConf.threadCount;
+    s->showMinimap = true;
+    s->showControls = true;
+    s->showPlayerInfo = false;
+    s->showOptions = false;
 
     appUpdateSettings(a);
 }
 
 void appInitMenu(App* a) {
+    Settings* s = &a->settings;
+
     MenuItem* tempItems[] = {
         menuItCreateTitle("OPTIONS"),
         menuItCreateTitle("Interface"),
@@ -279,17 +304,17 @@ void appInitMenu(App* a) {
             "Show FPS",
             PERFIMP_NONE,
             "How much detail about\nFPS should be shown",
-            &a->settings.showFPSLevel,
-            &a->settings.showFPSLevel,
-            SHOWFPS_COUNT - 1,
+            &s->fpsSettg,
+            &s->fpsSettg,
+            FPS_SETTG_COUNT - 1,
             false,
-            &a->settings.fpsSettgDisplay
+            &s->fpsSettgDisplay
         )),
         menuItCreateSetting(settingCreateCheckbox(
             "Show Minimap",
             PERFIMP_NONE,
             "Show or hide minimap",
-            &a->settings.showMinimap
+            &s->showMinimap
         )),
         menuItCreateSetting(settingCreateCheckbox(
             "Show Player Info",
@@ -297,24 +322,24 @@ void appInitMenu(App* a) {
             "Show or hide information\n"
             "about the player's position,\n"
             "altitude etc.",
-            &a->settings.showPlayerInfo
+            &s->showPlayerInfo
         )),
         menuItCreateSetting(settingCreateCheckbox(
             "Show Controls",
             PERFIMP_NONE,
             "Show or hide controls",
-            &a->settings.showControls
+            &s->showControls
         )),
         menuItCreateTitle("Environment"),
         menuItCreateSetting(settingCreateChoice(
             "Choose Map",
             PERFIMP_NONE,
             "Select a map from maps folder",
-            &a->settings.mapIdxPeek,
-            &a->settings.mapIdxTried,
-            (int)a->settings.mapCount - 1,
+            &s->mapIdxPeek,
+            &s->mapIdxTried,
+            (int)s->mapCount - 1,
             true,
-            &a->settings.mapSettgDisplay
+            &s->mapSettgDisplay
         )),
         menuItCreateSetting(settingCreateSlider(
             "Max Height",
@@ -329,17 +354,17 @@ void appInitMenu(App* a) {
             "Sky Color",
             PERFIMP_NONE,
             "Color of the sky",
-            &a->settings.skyColorIdx,
-            &a->settings.skyColorIdx,
-            COLOR_PRESET_COUNT - 1,
+            &s->skySettg,
+            &s->skySettg,
+            s->skyPresetCount - 1,
             false,
-            &a->settings.skySettgDisplay
+            &s->skySettgDisplay
         )),
         menuItCreateSetting(settingCreateSlider(
             "Fog Distance",
             PERFIMP_NONE,
             "Fog distance as percentage\nof the view distance",
-            &a->settings.fogDistPercent,
+            &s->fogDistPercent,
             0,
             100,
             5
@@ -349,7 +374,7 @@ void appInitMenu(App* a) {
             "Field of View",
             PERFIMP_LOW,
             "Horizontal field of fiev",
-            &a->settings.hFovDeg,
+            &s->hFovDeg,
             60,
             120,
             5
@@ -369,24 +394,24 @@ void appInitMenu(App* a) {
             "The maximum distance at the\nterrain will be visible",
             &a->rendConf.viewDist,
             100,
-            10000,
+            FLT_MAX,
             100
         )),
         menuItCreateSetting(settingCreateChoice(
             "Resolution",
             PERFIMP_EXTREME,
             "Resolution to render the terrain",
-            &a->settings.resIdxPeek,
-            &a->settings.resIdxTried,
-            RENDER_WIDTH_PRESET_COUNT - 1 + 1,
+            &s->rendWIdxPeek,
+            &s->rendWIdxTried,
+            s->rendWidthCount - 1 + 1,
             true,
-            &a->settings.resSettgDisplay
+            &s->rendWSettgDisplay
         )),
         menuItCreateSetting(settingCreateSlider(
             "Thread Count",
             PERFIMP_EXTREME,
             "Threads to use during\nthe rendering process",
-            &a->settings.threadCount,
+            &s->threadCount,
             1,
             MAX_THREAD_COUNT,
             1
@@ -421,20 +446,20 @@ void appUpdateSettings(App* a) {
     }
     a->rendConf.threadCount = (int)s->threadCount;
     a->rendConf.fogStartDist = s->fogDistPercent/100 * a->rendConf.viewDist;
-    a->map.skyColor = colorPresets[s->skyColorIdx].color;
+    a->map.skyColor = s->skyPresets[s->skySettg].color;
     s->mapSettgDisplay = s->mapNames[s->mapIdxPeek];
-    s->fpsSettgDisplay = (char*)showFPSDisplays[s->showFPSLevel];
-    s->skySettgDisplay = (char*)colorPresets[s->skyColorIdx].name;
+    s->fpsSettgDisplay = (char*)s->fpsSettgDisplays[s->fpsSettg];
+    s->skySettgDisplay = (char*)s->skyPresets[s->skySettg].name;
 
-    int peekW = s->resIdxPeek == RENDER_WIDTH_PRESET_COUNT ? GetScreenWidth()
-                : renderWidthPresets[s->resIdxPeek];
+    int peekW = s->rendWIdxPeek == s->rendWidthCount ? GetScreenWidth()
+                : s->rendWidths[s->rendWIdxPeek];
     int peekH = peekW*GetScreenHeight()/GetScreenWidth();
-    snprintf(s->resSettgDisplay, MENU_DISPLAY_BUFF_SIZE, "%dx%d", peekW, peekH);
+    snprintf(s->rendWSettgDisplay, MENU_DISPLAY_BUFF_SIZE, "%dx%d", peekW, peekH);
 
-    if (s->resIdxTried != s->resIdxApplied) {
-        s->resIdxApplied = s->resIdxTried;
-        int targetW = s->resIdxPeek == RENDER_WIDTH_PRESET_COUNT ? GetScreenWidth()
-                    : renderWidthPresets[s->resIdxApplied];
+    if (s->rendWIdxTried != s->rendWIdxApplied) {
+        s->rendWIdxApplied = s->rendWIdxTried;
+        int targetW = s->rendWIdxPeek == s->rendWidthCount ? GetScreenWidth()
+                    : s->rendWidths[s->rendWIdxApplied];
         int targetH = targetW*GetScreenHeight()/GetScreenWidth();
         a->rendConf.width = targetW;
         a->rendConf.height = targetH;

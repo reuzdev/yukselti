@@ -3,7 +3,19 @@
 
 #include "common.h"
 
-#define NULL_FLT (OptionalFloat){ .exists = false, .value = 0 }
+typedef enum PerfImpLabelType {
+    PERFIMP_NONE = 0,
+    PERFIMP_LOW,
+    PERFIMP_MEDIUM,
+    PERFIMP_HIGH,
+    PERFIMP_EXTREME,
+    PERFIMP_COUNT
+} PerfImpLabelType;
+
+typedef struct PerfImpLabel {
+    const char* label;
+    Color color;
+} PerfImpLabel;
 
 typedef struct OptionalFloat {
     bool exists;
@@ -28,7 +40,7 @@ typedef enum SettingType {
 
 typedef struct Setting {
     SettingType type;
-    PerformanceImpact perfImpact;
+    PerfImpLabelType perfImpact;
     const char* label;
     const char* description;
     union
@@ -66,6 +78,8 @@ typedef struct Menu {
     const char* selectionPrefix;
 } Menu;
 
+PerfImpLabel getPerfImpLabel(size_t i);
+
 Rectangle rectWithSizePosDef(Vector2 size, Sides posDef);
 Rectangle padRect(Rectangle rect, float padding);
 Vector2 rectSize(Rectangle rect);
@@ -75,9 +89,9 @@ OptionalFloat optFltVal(float value);
 OptionalFloat optFltNull();
 Sides sidesCreate(OptionalFloat top, OptionalFloat right, OptionalFloat bottom, OptionalFloat left);
 
-Setting settingCreateSlider(const char* label, PerformanceImpact perfImpact, const char* description, float* value, float min, float max, float step);
-Setting settingCreateCheckbox(const char* label, PerformanceImpact perfImpact, const char* description, bool* value);
-Setting settingCreateChoice(const char* label, PerformanceImpact perfImpact, const char* description, int* peek, int* select, int max, bool askToApply, const char** show);
+Setting settingCreateSlider(const char* label, PerfImpLabelType perfImpact, const char* description, float* value, float min, float max, float step);
+Setting settingCreateCheckbox(const char* label, PerfImpLabelType perfImpact, const char* description, bool* value);
+Setting settingCreateChoice(const char* label, PerfImpLabelType perfImpact, const char* description, int* peek, int* select, int max, bool askToApply, const char** show);
 void settingUpdate(Setting* settg);
 
 void menuDestroy(Menu* menu);
